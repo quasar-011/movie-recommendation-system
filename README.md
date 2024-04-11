@@ -28,7 +28,7 @@ The MovieLens dataset is used as the foundation for this recommendation system. 
    * scikit-learn<br>
 
 <h2> Reference </h2>
-MovieLens:[Link](https://movielens.org/)
+MovieLens: [MovieLens](https://movielens.org/)
 
 <h2>License</h2> 
 This project is licensed under the MIT License. See the [License](https://github.com/quasar-011/movie-recommendation-system/blob/main/LICENSE) file for details.
