@@ -1,4 +1,5 @@
 # Import the required libraries
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from surprise import Dataset, Reader, SVD
 from fuzzywuzzy import process
@@ -25,7 +26,7 @@ model.fit(trainset)
 dump(model, 'SVD_model.joblib')
 
 # Load the model
-loaded_model = load('SVD_model.joblib'
+loaded_model = load('SVD_model.joblib')
 
 # User input function
 def get_user_input():
