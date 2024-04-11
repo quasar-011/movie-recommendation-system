@@ -1,27 +1,26 @@
-
-import pandas as pd
+# Import the required libraries
 from sklearn.model_selection import train_test_split
 from surprise import Dataset, Reader, SVD
 from fuzzywuzzy import process
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
-# Load datasets
+# Load the Datasets
 ratings_data = pd.read_csv('/home/quasar_011/Developer/datasets/movieLens/rating.csv')
 movies_data = pd.read_csv('/home/quasar_011/Developer/datasets/movieLens/movie.csv')
 tags_data = pd.read_csv('/home/quasar_011/Developer/datasets/movieLens/tag.csv')
 
-# Train-test split
+# Split the dataset
 train_data, test_data = train_test_split(ratings_data, test_size=0.2, random_state=42)
 
-# Train the SVD model
+# Training
 reader = Reader(rating_scale=(1, 5))
 train_dataset = Dataset.load_from_df(train_data[['userId', 'movieId', 'rating']], reader)
 model = SVD()
 trainset = train_dataset.build_full_trainset()
 model.fit(trainset)
 
-# Function to get user input for movies and genres
+# User input function
 def get_user_input():
     selected_movies = []
     selected_genres = []
@@ -45,11 +44,11 @@ def get_user_input():
     
     return selected_movies, selected_genres
 
-# Function to get similar movies based on user input
+# Similar movie function
 def get_similar_movies(selected_movies, selected_genres):
     similar_movies = []
     for movie_title in selected_movies:
-        # Find the closest match for the input movie title
+        # Match the closest movieName string 
         match = process.extractOne(movie_title, movies_data['title'])
         matched_movie_title = match[0]
 
@@ -80,7 +79,8 @@ def get_similar_movies(selected_movies, selected_genres):
 
         # Add similar movies to the list
         similar_movies.extend(similar_movies_info)
-    
+        
+    # Return only top 10 similar movies
     return similar_movies[:10]
 
 # Get user input
