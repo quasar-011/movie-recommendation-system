@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from surprise import Dataset, Reader, SVD
 from fuzzywuzzy import process
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 
 # Load datasets
 ratings_data = pd.read_csv('/home/quasar_011/Developer/datasets/movieLens/rating.csv')
@@ -47,21 +49,37 @@ def get_user_input():
 def get_similar_movies(selected_movies, selected_genres):
     similar_movies = []
     for movie_title in selected_movies:
+        # Find the closest match for the input movie title
         match = process.extractOne(movie_title, movies_data['title'])
         matched_movie_title = match[0]
-        
-        # Find similar movies based on genres
-        similar_movie_ids = movies_data[movies_data['genres'].apply(lambda x: any(genre in x for genre in movies_data[movies_data['title'] == matched_movie_title]['genres'].values[0]))]
-        
-        # Exclude the input movie from similar movies
-        similar_movie_ids = similar_movie_ids[similar_movie_ids['title'] != matched_movie_title]
-        
-        # Sample similar movies if there are more than 10
-        if len(similar_movie_ids) > 10:
-            similar_movie_ids = similar_movie_ids.sample(n=10, replace=False, random_state=42)
-        
+
+        # Get the movieId of the matched movie
+        matched_movie_id = movies_data.loc[movies_data['title'] == matched_movie_title, 'movieId'].values[0]
+
+        # Get movie genres
+        movie_genres = movies_data.loc[movies_data['title'] == matched_movie_title, 'genres'].values[0]
+
+        # Calculate TF-IDF vectors for movie genres
+        tfidf = TfidfVectorizer(stop_words='english')
+        genres_tfidf_matrix = tfidf.fit_transform(movies_data['genres'])
+
+        # Calculate TF-IDF vector for input genres
+        input_genres_tfidf = tfidf.transform([','.join(selected_genres)])
+
+        # Calculate cosine similarity between input genres and all movies
+        cosine_similarities = linear_kernel(input_genres_tfidf, genres_tfidf_matrix).flatten()
+
+        # Get indices of top similar movies based on genres
+        similar_movie_indices = cosine_similarities.argsort()[::-1]
+
+        # Filter out the input movie and select top 10 similar movies
+        similar_movie_indices = similar_movie_indices[similar_movie_indices != matched_movie_id][:10]
+
+        # Get movie titles and genres of similar movies
+        similar_movies_info = movies_data.iloc[similar_movie_indices][['title', 'genres']].values.tolist()
+
         # Add similar movies to the list
-        similar_movies.extend(similar_movie_ids[['title', 'genres']].values.tolist())
+        similar_movies.extend(similar_movies_info)
     
     return similar_movies[:10]
 
