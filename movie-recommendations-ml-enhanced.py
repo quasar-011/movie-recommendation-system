@@ -4,6 +4,7 @@ from surprise import Dataset, Reader, SVD
 from fuzzywuzzy import process
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from joblib import dump, load
 
 # Load the Datasets
 ratings_data = pd.read_csv('/home/quasar_011/Developer/datasets/movieLens/rating.csv')
@@ -19,6 +20,12 @@ train_dataset = Dataset.load_from_df(train_data[['userId', 'movieId', 'rating']]
 model = SVD()
 trainset = train_dataset.build_full_trainset()
 model.fit(trainset)
+
+# Save the model
+dump(model, 'SVD_model.joblib')
+
+# Load the model
+loaded_model = load('SVD_model.joblib'
 
 # User input function
 def get_user_input():
